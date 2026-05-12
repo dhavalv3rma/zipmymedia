@@ -1,0 +1,26 @@
+# Files and folders excluded from the wp.org SVN deploy.
+# Read by 10up/action-wordpress-plugin-deploy and most wp-deploy scripts.
+
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+.idea
+.vscode
+
+# Git
+.git
+.gitignore
+.gitattributes
+.github
+
+# Build artifacts
+*.zip
+node_modules
+vendor
+
+# Local Claude / agent config
+.claude
+.distignore
+
+# Repo-only docs
+README.md

@@ -1,5 +1,5 @@
 === ZipMyMedia ===
-Contributors: dhaval Verma
+Contributors: dhavalv44
 Tags: media, media library, download, bulk, zip
 Requires at least: 5.5
 Tested up to: 6.9

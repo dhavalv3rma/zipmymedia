@@ -11,7 +11,7 @@
  * got stuck in the uploads folder (e.g. a download was interrupted mid-stream),
  * we sweep them up here.
  *
- * @package BulkMediaDownloader
+ * @package ZipMyMedia
  */
 
 // Make sure WordPress called this file — direct access is blocked
@@ -19,13 +19,39 @@ if (!defined('WP_UNINSTALL_PLUGIN')) {
     exit;
 }
 
-// Sweep up any leftover ZIP files from interrupted downloads
-$upload_dir = wp_upload_dir();
-$pattern    = trailingslashit($upload_dir['basedir']) . 'media-download-*.zip';
-$leftover   = glob($pattern);
-
-if (is_array($leftover)) {
-    foreach ($leftover as $file) {
-        @unlink($file);
+/**
+ * Sweep up any leftover ZIP files from interrupted downloads.
+ * Matches both the legacy "media-download-*.zip" name and the new
+ * "zipmym-<token>-media-download-*.zip" name.
+ */
+function zipmym_uninstall_cleanup_site() {
+    $upload_dir = wp_upload_dir();
+    if (empty($upload_dir['basedir'])) {
+        return;
     }
+    $basedir = trailingslashit($upload_dir['basedir']);
+
+    foreach (['media-download-*.zip', 'zipmym-*-media-download-*.zip'] as $pattern) {
+        $leftover = glob($basedir . $pattern);
+        if (!is_array($leftover)) {
+            continue;
+        }
+        foreach ($leftover as $file) {
+            if (file_exists($file)) {
+                wp_delete_file($file);
+            }
+        }
+    }
+}
+
+// On multisite, iterate every blog so we clean each site's uploads.
+if (is_multisite()) {
+    $site_ids = get_sites(['fields' => 'ids', 'number' => 0]);
+    foreach ($site_ids as $site_id) {
+        switch_to_blog($site_id);
+        zipmym_uninstall_cleanup_site();
+        restore_current_blog();
+    }
+} else {
+    zipmym_uninstall_cleanup_site();
 }
